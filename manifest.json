@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Crunchyroll Scene Skip",
+  "version": "1.0.0",
+  "description": "Manually timestamp and auto-skip scenes on Crunchyroll by tag type.",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://www.crunchyroll.com/*",
+    "https://static.crunchyroll.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.crunchyroll.com/*",
+        "https://static.crunchyroll.com/*"
+      ],
+      "js": ["storage.js", "overlay.js", "content.js"],
+      "css": ["overlay.css"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}

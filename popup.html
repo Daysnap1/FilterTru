@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crunchyroll Scene Skip</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 380px;
+      min-height: 200px;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+    }
+
+    header {
+      background: #111;
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #333;
+    }
+    header h1 { font-size: 14px; font-weight: 700; color: #f47521; }
+
+    /* Global skip toggle */
+    .toggle-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 16px; background: #222; border-bottom: 1px solid #333;
+    }
+    .toggle-label { font-size: 12px; color: #aaa; flex: 1; }
+    .toggle-switch { position: relative; width: 36px; height: 20px; }
+    .toggle-switch input { display: none; }
+    .toggle-switch .slider {
+      position: absolute; inset: 0; background: #555;
+      border-radius: 20px; cursor: pointer; transition: background 0.2s;
+    }
+    .toggle-switch .slider::before {
+      content: ''; position: absolute; width: 14px; height: 14px;
+      background: #fff; border-radius: 50%; top: 3px; left: 3px;
+      transition: transform 0.2s;
+    }
+    .toggle-switch input:checked + .slider { background: #27ae60; }
+    .toggle-switch input:checked + .slider::before { transform: translateX(16px); }
+
+    /* Episode list */
+    .section { padding: 10px 14px; }
+    .section-title { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+    #episode-list { max-height: 340px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #444 transparent; }
+
+    /* Episode accordion */
+    .ep-item { border: 1px solid #2e2e2e; border-radius: 6px; margin-bottom: 6px; overflow: hidden; }
+
+    .ep-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 10px; background: #252525; cursor: pointer;
+      user-select: none; transition: background 0.15s;
+    }
+    .ep-header:hover { background: #2c2c2c; }
+
+    .ep-arrow { font-size: 10px; color: #666; transition: transform 0.2s; flex-shrink: 0; }
+    .ep-item.open .ep-arrow { transform: rotate(90deg); }
+    .ep-title { flex: 1; font-size: 12px; color: #ccc; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ep-badge {
+      background: #f47521; color: #fff; font-size: 10px; font-weight: 700;
+      padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+    }
+
+    /* Segment rows */
+    .ep-segments { display: none; border-top: 1px solid #2e2e2e; }
+    .ep-item.open .ep-segments { display: block; }
+
+    .seg-row {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-bottom: 1px solid #222;
+      cursor: pointer; transition: background 0.1s;
+    }
+    .seg-row:last-child { border-bottom: none; }
+    .seg-row:hover { background: rgba(255,255,255,0.04); }
+    .seg-row.active { background: rgba(244,117,33,0.1); }
+
+    .seg-times { font-size: 11px; font-weight: 600; color: #ddd; flex-shrink: 0; }
+    .seg-tag {
+      font-size: 10px; padding: 1px 6px; border-radius: 8px; flex-shrink: 0;
+      font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .seg-tag.sexual   { background: rgba(231,76,60,0.3);  color: #e74c3c; }
+    .seg-tag.violence { background: rgba(230,126,34,0.3); color: #e67e22; }
+    .seg-tag.filler   { background: rgba(52,152,219,0.3); color: #3498db; }
+    .seg-tag.other    { background: rgba(149,165,166,0.3); color: #95a5a6; }
+
+    .seg-note { font-size: 10px; color: #666; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .seg-delete { background: none; border: none; color: #c0392b; cursor: pointer; font-size: 14px; flex-shrink: 0; padding: 0 2px; }
+    .seg-delete:hover { color: #e74c3c; }
+
+    /* Inline edit form */
+    .seg-edit-form {
+      display: none; padding: 8px 10px 10px;
+      background: #1e1e1e; border-top: 1px solid #333;
+    }
+    .seg-edit-form.open { display: block; }
+
+    .edit-row { display: flex; gap: 8px; margin-bottom: 7px; }
+    .edit-field { flex: 1; }
+    .edit-field label { font-size: 10px; color: #888; display: block; margin-bottom: 2px; }
+    .edit-field input, .edit-field select {
+      width: 100%; background: #2a2a2a; border: 1px solid #3a3a3a;
+      color: #e0e0e0; border-radius: 4px; padding: 4px 6px; font-size: 12px;
+    }
+    .edit-field input:focus, .edit-field select:focus { outline: none; border-color: #f47521; }
+    .edit-field select option { background: #222; }
+
+    .edit-note-row { margin-bottom: 8px; }
+    .edit-note-row label { font-size: 10px; color: #888; display: block; margin-bottom: 2px; }
+    .edit-note-row input {
+      width: 100%; background: #2a2a2a; border: 1px solid #3a3a3a;
+      color: #e0e0e0; border-radius: 4px; padding: 4px 6px; font-size: 12px;
+    }
+    .edit-note-row input:focus { outline: none; border-color: #f47521; }
+
+    .edit-actions { display: flex; gap: 6px; }
+    .edit-btn {
+      flex: 1; padding: 5px 8px; border: none; border-radius: 4px;
+      font-size: 11px; font-weight: 600; cursor: pointer; transition: filter 0.15s;
+    }
+    .edit-btn:hover { filter: brightness(1.15); }
+    .edit-btn.save   { background: #27ae60; color: #fff; }
+    .edit-btn.cancel { background: #3a3a3a; color: #aaa; }
+
+    /* Empty state */
+    .empty-msg { text-align: center; color: #444; font-size: 12px; padding: 24px 0; }
+
+    /* Action bar */
+    .action-row {
+      display: flex; gap: 6px; padding: 10px 14px;
+      border-top: 1px solid #2a2a2a; flex-wrap: wrap;
+    }
+    .action-btn {
+      flex: 1; padding: 7px 6px; border: none; border-radius: 5px;
+      font-size: 11px; font-weight: 600; cursor: pointer; transition: filter 0.15s;
+      min-width: 60px;
+    }
+    .action-btn:hover { filter: brightness(1.15); }
+    .btn-export { background: #2980b9; color: #fff; }
+    .btn-import { background: #8e44ad; color: #fff; }
+    .btn-clear  { background: #c0392b; color: #fff; }
+
+    #file-input { display: none; }
+
+    #status-msg {
+      text-align: center; font-size: 11px; color: #27ae60;
+      padding: 4px 14px 8px; min-height: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>&#9654; Crunchyroll Scene Skip</h1>
+  </header>
+
+  <div class="toggle-row">
+    <span class="toggle-label">Auto-skip enabled globally</span>
+    <label class="toggle-switch">
+      <input type="checkbox" id="global-skip-toggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Saved Episodes</div>
+    <div id="episode-list">
+      <div class="empty-msg">No episodes saved yet.</div>
+    </div>
+  </div>
+
+  <div id="status-msg"></div>
+
+  <div class="action-row">
+    <button class="action-btn btn-export" id="btn-export">Export JSON</button>
+    <button class="action-btn btn-import" id="btn-import">Import JSON</button>
+    <button class="action-btn btn-clear"  id="btn-clear">Clear All</button>
+  </div>
+
+  <input type="file" id="file-input" accept=".json" />
+  <script src="storage.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

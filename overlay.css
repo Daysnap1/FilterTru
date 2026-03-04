@@ -1,0 +1,218 @@
+/* overlay.css — Crunchyroll Scene Skip */
+
+/* ── Main Overlay (main frame) ─────────────────────────────── */
+
+#cr-skip-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483647;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 13px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.92);
+  border: 2px solid #f47521;
+  border-radius: 8px;
+  min-width: 260px;
+  max-width: 300px;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.9);
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+
+#cr-skip-overlay.dragging { opacity: 0.85; cursor: grabbing; }
+
+/* Header */
+#cr-skip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 6px 6px 0 0;
+  cursor: grab;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+#cr-skip-header:active { cursor: grabbing; }
+
+#cr-skip-title { font-weight: 700; font-size: 12px; color: #f47521; letter-spacing: 0.5px; }
+
+#cr-skip-header-right { display: flex; align-items: center; gap: 5px; }
+
+#cr-skip-hotkey-indicator {
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.12);
+  color: #aaa;
+  cursor: default;
+}
+#cr-skip-hotkey-indicator.disabled { color: #555; background: rgba(255,255,255,0.05); }
+
+#cr-skip-toggle-skip {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+#cr-skip-toggle-skip.active { background: #27ae60; border-color: #27ae60; }
+
+#cr-skip-collapse-btn {
+  background: none; border: none; color: #aaa;
+  cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px;
+  transition: color 0.15s;
+}
+#cr-skip-collapse-btn:hover { color: #fff; }
+
+/* Body */
+#cr-skip-body {
+  padding: 10px;
+  overflow: hidden;
+  transition: max-height 0.25s ease, padding 0.25s ease;
+  max-height: 700px;
+}
+#cr-skip-body.collapsed { max-height: 0; padding: 0 10px; }
+
+/* Time display */
+#cr-skip-time-display {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+  color: #f0f0f0;
+  font-variant-numeric: tabular-nums;
+}
+
+#cr-skip-pending { font-size: 11px; color: #aaa; margin-bottom: 6px; min-height: 14px; }
+
+/* Buttons */
+.cr-skip-btn-row { display: flex; gap: 6px; margin-bottom: 8px; }
+
+.cr-skip-btn {
+  flex: 1; padding: 6px 4px; border: none; border-radius: 5px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+.cr-skip-btn:hover { filter: brightness(1.15); }
+.cr-skip-btn:active { transform: scale(0.97); }
+.cr-skip-btn.mark-start { background: #2980b9; color: #fff; }
+.cr-skip-btn.mark-end   { background: #e67e22; color: #fff; }
+.cr-skip-btn.save       { background: #27ae60; color: #fff; }
+.cr-skip-btn.delete     { background: #c0392b; color: #fff; }
+
+.cr-skip-btn kbd {
+  font-size: 9px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 3px;
+  padding: 1px 3px;
+  font-family: monospace;
+}
+
+/* Tag select */
+#cr-skip-tag-section { margin-bottom: 8px; }
+#cr-skip-tag-section label { font-size: 11px; color: #aaa; display: block; margin-bottom: 3px; }
+#cr-skip-tag-select {
+  width: 100%; background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2); color: #fff;
+  border-radius: 4px; padding: 4px 6px; font-size: 12px; cursor: pointer;
+}
+#cr-skip-tag-select option { background: #222; color: #fff; }
+
+/* Note input */
+#cr-skip-note-section { margin-bottom: 8px; }
+#cr-skip-note-section label { font-size: 11px; color: #aaa; display: block; margin-bottom: 3px; }
+#cr-skip-note-input {
+  width: 100%; background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2); color: #fff;
+  border-radius: 4px; padding: 4px 6px; font-size: 12px; box-sizing: border-box;
+}
+#cr-skip-note-input::placeholder { color: #555; }
+
+/* Per-tag skip toggles */
+#cr-skip-skip-tags-section { margin-bottom: 4px; }
+.cr-skip-section-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+
+#cr-skip-tag-toggles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.cr-skip-tag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #ccc;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background 0.1s;
+}
+.cr-skip-tag-toggle:hover { background: rgba(255,255,255,0.07); }
+.cr-skip-tag-toggle input { cursor: pointer; accent-color: #f47521; }
+
+/* Divider */
+.cr-skip-divider { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 8px 0; }
+
+/* Segment list */
+#cr-skip-segment-list { max-height: 150px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.2) transparent; }
+#cr-skip-segment-list::-webkit-scrollbar { width: 4px; }
+#cr-skip-segment-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+.cr-skip-segment-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px; border-radius: 4px; background: rgba(255,255,255,0.05);
+  margin-bottom: 3px; gap: 5px;
+}
+.cr-skip-segment-info { flex: 1; overflow: hidden; }
+.cr-skip-segment-times { font-size: 11px; font-weight: 600; color: #e0e0e0; }
+.cr-skip-segment-tag { font-size: 10px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.cr-skip-segment-delete {
+  background: #c0392b; border: none; color: #fff; border-radius: 3px;
+  padding: 2px 6px; font-size: 10px; cursor: pointer; flex-shrink: 0;
+}
+.cr-skip-segment-delete:hover { filter: brightness(1.2); }
+
+#cr-skip-no-segments { text-align: center; color: #555; font-size: 11px; padding: 8px 0; }
+
+/* ── Seek Bar Markers (player iframe) ──────────────────────── */
+
+.cr-skip-seek-marker {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.75;
+  border-radius: 1px;
+  z-index: 9999;
+}
+
+/* ── Toast Notification (player iframe) ────────────────────── */
+
+#cr-skip-toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.82);
+  color: #fff;
+  padding: 7px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-weight: 600;
+  z-index: 2147483647;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+#cr-skip-toast.visible { opacity: 1; }
